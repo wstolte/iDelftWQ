@@ -289,7 +289,7 @@ server <- function(input, output, session) {
     
     output$timePlot1 <- renderPlot({
         dff1 <- nc_his2df(nc1(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "left")
-        # dff2 <- nc_his2df(nc2(), input$subs2, input$locs2, input$layer2) %>% mutate(plot = "right")
+        # dff2 <- nc_his2df(nc2(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "right")
         dff <- dff1 #%>% bind_rows(dff2)
         
         ggplot(dff, aes(datetime, value)) + 

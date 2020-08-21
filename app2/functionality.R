@@ -65,6 +65,76 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
 }
 
 
+Ecoplot_bloom <- function(con, 
+                     locmod, 
+                     submod, 
+                     limmod = c("Limit e", "Limit nit", "Limit pho", 
+                                "Limit sil", "Limit gro", "Limit mor"), 
+                     plottype = 1) {
+  
+  # use con to:
+  # read limitation parameter data
+  # read submod, locmod, limmod
+  # Then
+  # make plots for left and right
+  
+  
+  
+  
+  
+  if (require("plyr")) {
+    print("plyr is loaded correctly")
+  }
+  else {
+    print("trying to install plyr")
+    install.packages("plyr")
+    if (require(plyr)) {
+      print("plyr installed and loaded")
+    }
+    else {
+      stop("could not install plyr")
+    }
+  }
+  df.y <- arr2df(arr = arr, locmod = locmod, submod = submod)
+  lablim = mapvalues(limmod, c("Limit e", "Limit nit", "Limit pho", 
+                               "Limit sil", "Limit gro", "Limit mor"), c("L", "N", "P", 
+                                                                         "Si", "gro", "mor"))
+  df.lim <- arr2df(arr, locmod, limmod)
+  df.lim$variable <- factor(df.lim$variable)
+  yy = range(ceiling(df.y$value * 10)/10, na.rm = T)
+  steps <- seq(-yy[2]/10, -length(limmod) * yy[2]/10, by = -yy[2]/10)
+  df.lim$step <- steps[as.numeric(as.factor(df.lim$variable))]
+  colnames(df.lim) <- mapvalues(colnames(df.lim), from = "variable", 
+                                to = "limitation")
+  df.lim$limitation <- mapvalues(df.lim$limitation, c("Limit e", 
+                                                      "Limit nit", "Limit pho", "Limit sil", "Limit gro", "Limit mor"), 
+                                 c("light", "nitrogen", "phophorus", "silica", "growth", 
+                                   "mortality"))
+  library(ggplot2)
+  library(scales)
+  annotate.position.x <- as.POSIXct(as.numeric(min(df.lim$time)) - 
+                                      as.numeric(min(df.lim$time))/1200, origin = "1970-01-01 00:00:00")
+  z = ggplot(aes(time, value), data = df.y) + facet_grid(variable ~ 
+                                                           location)
+  if (plottype == 1) {
+    z = z + geom_line(aes(x = time, y = step, color = limitation, 
+                          size = value), data = df.lim)
+  }
+  if (plottype == 2) {
+    z = z + geom_line(aes(x = time, y = step, color = limitation, 
+                          alpha = value), data = df.lim, size = 3)
+  }
+  z = z + theme(text = element_text(size = 16)) + scale_x_datetime(breaks = date_breaks("2 months"), 
+                                                                   minor_breaks = date_breaks("month"), labels = date_format("%b")) + 
+    scale_y_continuous(expand = c(0.15, 0), breaks = pretty_breaks(n = 2)(yy)) + 
+    scale_size_continuous(range = c(0, 4)) + annotate("text", 
+                                                      x = annotate.position.x, y = steps, label = lablim, size = 3) + 
+    theme_bw(base_size = 12, base_family = "") + theme(panel.border = element_blank(), 
+                                                       panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+                                                       axis.line = element_line(colour = "black"))
+  z
+}
+
 #test
 # con <- "p:/11204882-002-interreg-wadden-sea/simulations/A07_waq_normal_e3_2006_new_obs/DFM_OUTPUT_DCSM-FM_0_5nm_waq/DCSM-FM_0_5nm_waq_0000_his.nc"
 # nc <- ncdf4::nc_open(con)
