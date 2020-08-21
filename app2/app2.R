@@ -37,6 +37,14 @@
 
 ##==install packages and open libraries ====
 
+getPackage <- function(pkg){
+    if(!require(pkg, character.only = TRUE)){
+        install.packages(pkg, dependencies = TRUE)
+        library(pkg, character.only = TRUE)
+    }
+    return(TRUE)
+}
+
 # install.packages("shiny")          ## shiny
 # install.packages("shinydashboard") ## layout for shiny
 # install.packages("data.table")     ## working with data.frames the data.table way
@@ -60,16 +68,16 @@
 # install.packages("mapview")
 # install.packages("XML")
 
-library(shiny)         
-library(shinydashboard)
+getPackage(shiny)         
+getPackage(shinydashboard)
 # library(leaflet)
 # library(plotly)
-library(lubridate)
+getPackage(lubridate)
 # library(shinyjs)
-library(shinycssloaders)
+getPackage(shinycssloaders)
 # library(plyr)
 # library(rgdal)
-library(V8)
+getPackage(V8)
 # library(htmlwidgets)
 # library(mapview)
 # library(XML)

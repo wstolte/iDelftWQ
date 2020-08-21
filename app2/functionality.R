@@ -1,5 +1,5 @@
-require(ncdf4)
-require(tidyverse)
+getPackage(ncdf4)
+getPackage(tidyverse)
 
 # ncdf4::nc_close(nc = nc1)
 
@@ -19,7 +19,6 @@ colbind_loc_vars <- function(nc, vars = c("station_x_coordinate", "station_y_coo
 # subsetting nc_his file for locations, layers, variables and time steps
 nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   
-  require(ncdf4)
   
   # locations
   # check availability and raise an error if not
