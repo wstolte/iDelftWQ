@@ -152,8 +152,10 @@ body    <- dashboardBody(
                         collapsible = F,
                         p("hisView is meant to view and compare water quality model output with other model output and data"),
                         img(src='deltares_logo.png'),
-                        width = 12))),
-        
+                        width = 12
+                    )
+                )
+        ),
         
         ##========= time series page ============================
         tabItem(tabName = "timeSeries",
@@ -181,7 +183,7 @@ body    <- dashboardBody(
                         width = 12,
                         solidHeader = T, 
                         # background = "green",
-                        status = "success"),
+                        status = "success")
                 )),
         
         
@@ -198,7 +200,7 @@ body    <- dashboardBody(
                     ),
                     
                 )),
-
+        
         
         ##== Limitation ecoplots ==============
         
@@ -243,8 +245,8 @@ server <- function(input, output, session) {
     ##========= reset shiny app ==================
     # observeEvent(input$reset_button, {js$reset()}) 
     
-
-###== First connection ==================================
+    
+    ###== First connection ==================================
     
     # opens connection to first model output file
     nc1 <- reactive({ncdf4::nc_open(input$con1)})
