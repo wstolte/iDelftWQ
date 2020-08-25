@@ -70,7 +70,7 @@ getPackage <- function(pkg){
 
 getPackage("shiny")         
 getPackage("shinydashboard")
-# library(leaflet)
+getPackage("leaflet")
 # library(plotly)
 getPackage("lubridate")
 # library(shinyjs)
@@ -135,6 +135,7 @@ header  <- dashboardHeader(title = "iDelftWQ")
 sidebar <- dashboardSidebar(
     sidebarMenu(id = "side_tabs",
                 menuItem(text = "Start", tabName = "start", icon = icon("home")),
+                menuItem(text = "Station map", tabName = "stationMap", icon = icon("map")),
                 menuItem(text = "Time series", tabName = "timeSeries", icon = icon("list-alt", lib = "glyphicon")),                # menuItem(text = "Z-waardes bekijken", tabName = "z_waardes", icon = icon("cogs")),
                 menuItem(text = "Target diagrams", tabName = "targetDiagrams", icon = icon("upload")),
                 menuItem(text = "Ecoplots", tabName = "ecoPlots", icon = icon("upload")),
@@ -161,13 +162,7 @@ body    <- dashboardBody(
                         p("hisView is meant to view and compare water quality model output with other model output and data"),
                         img(src='deltares_logo.png'),
                         width = 12
-                    )
-                )
-        ),
-        
-        ##========= time series page ============================
-        tabItem(tabName = "timeSeries",
-                fluidRow(
+                    ),
                     box(
                         textInput(
                             inputId = "con1", 
@@ -183,7 +178,22 @@ body    <- dashboardBody(
                             width = 1000, 
                             value = "another path"
                         )
-                    ),
+                    )
+                )
+        ),
+
+        ##========= map page ============================
+        tabItem(tabName = "stationMap",
+                fluidRow(
+                        leafletOutput("map1", height = "90vh"),
+                        width = 12#,
+                )
+        ),
+
+                
+        ##========= time series page ============================
+        tabItem(tabName = "timeSeries",
+                fluidRow(
                     box(title = "Time Series", 
                         # textOutput("testContent1"),
                         # tableOutput("testContent3"),
@@ -307,7 +317,24 @@ server <- function(input, output, session) {
             facet_grid(variable ~ location, scales = "free")
     })
     
-    
+    output$map1 <- renderLeaflet({
+        selectedLocs <- locVars1() %>%
+            filter(station_id %in% input$locs1)
+        
+        leaflet(locVars1()) %>%
+            addTiles() %>%
+            addCircleMarkers(lng = ~station_x_coordinate, 
+                             lat = ~station_y_coordinate, 
+                             label = ~station_id,
+                             radius = 4, stroke = F, fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = T)
+                             ) %>%
+            addCircleMarkers(data = selectedLocs,
+                             lng = ~station_x_coordinate, 
+                             lat = ~station_y_coordinate, 
+                             label = ~station_id,
+                             radius = 10, stroke = F, fillColor = "red", fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = T)
+                             )
+    })    
     
     ###== Second connection ==================================
     

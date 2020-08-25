@@ -23,9 +23,24 @@ colbind_loc_vars <- function(nc, vars = c("station_x_coordinate", "station_y_coo
   return(df)
 }
 
+allVars <- function(nc){
+  map(nc$var, list("size"))
+}
+
+
+varDims <- function(allvars){
+  map(allvars, function(x) length(x)) %>%
+    unlist(use.names = T) %>%
+    as.data.frame() %>%
+    rownames_to_column() %>%
+    rename(variable = rowname, dims = ".")
+}
+
 #test
+# allvars <- allVars(nc)
+# vardims <- varDims(allvars)
 # locvars = c("station_x_coordinate", "station_y_coordinate", "station_name", "station_id")
-# df <- colbind_loc_vars(nc, locvars)
+df <- colbind_loc_vars(nc)
 
 # subsetting nc_his file for locations, layers, variables and time steps
 nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
