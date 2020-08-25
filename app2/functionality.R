@@ -1,5 +1,16 @@
-getPackage(ncdf4)
-getPackage(tidyverse)
+
+
+getPackage <- function(pkg){
+  if(!require(pkg, character.only = TRUE)){
+    install.packages(pkg, dependencies = TRUE)
+    library(pkg, character.only = TRUE)
+  }
+  return(TRUE)
+}
+
+
+getPackage("ncdf4")
+getPackage("tidyverse")
 
 # ncdf4::nc_close(nc = nc1)
 
