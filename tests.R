@@ -1,6 +1,9 @@
 
 require(ncdf4)
 require(tidyverse)
+require(sf)
+
+source("app2/functionality.r")
 
 ncdf4::nc_close(nc = nc)
 con <- "p:/11204882-002-interreg-wadden-sea/simulations/A07_waq_normal_e3_2006_new_obs/DFM_OUTPUT_DCSM-FM_0_5nm_waq/DCSM-FM_0_5nm_waq_0000_his.nc"
@@ -20,6 +23,16 @@ allVarsDims <- map(allVars, function(x) length(x)) %>%
   as.data.frame() %>%
   rownames_to_column() %>%
   rename(variable = rowname, dims = ".")
+
+#test
+allvars <- allVars(nc)
+vardims <- varDims(allvars)
+df <- colbind_loc_vars(nc)
+
+mapviewOptions(platform = "leaflet")
+df %>%
+  sf::st_as_sf(coords = c("station_x_coordinate", "station_y_coordinate"), crs = 4326) %>%
+  mapview::mapview()
 
 
 

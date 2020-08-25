@@ -45,42 +45,17 @@ getPackage <- function(pkg){
     return(TRUE)
 }
 
-# install.packages("shiny")          ## shiny
-# install.packages("shinydashboard") ## layout for shiny
-# install.packages("data.table")     ## working with data.frames the data.table way
-# install.packages("ggplot2")        ## plotting
-# install.packages("openxlsx")       ## open excel files
-# install.packages("digest")         ## needed for dev version ggplot2
-# install.packages("devtools")
-# devtools::install_github('hadley/ggplot2')
-# install.packages("leaflet")
-# install.packages("plotly")
-# install.packages("lubridate")
-# install.packages("tidyverse")
-# install.packages("tidyr")
-# install.packages("rgdal")
-# install.packages("shinyjs")
-# install.packages("rmapshaper")
-# install.packages("shinycssloaders")
-# install.packages("plyr")
-# install.packages("V8")
-# install.packages("htmlwidgets")
-# install.packages("mapview")
-# install.packages("XML")
 
 getPackage("shiny")         
 getPackage("shinydashboard")
 getPackage("leaflet")
-# library(plotly)
 getPackage("lubridate")
-# library(shinyjs)
 getPackage("shinycssloaders")
-# library(plyr)
-# library(rgdal)
 getPackage("V8")
 # library(htmlwidgets)
-# library(mapview)
-# library(XML)
+# getPackage("mapview")
+# library(plotly)
+# library(shinyjs)
 
 
 
@@ -318,21 +293,28 @@ server <- function(input, output, session) {
     })
     
     output$map1 <- renderLeaflet({
-        selectedLocs <- locVars1() %>%
-            filter(station_id %in% input$locs1)
         
-        leaflet(locVars1()) %>%
+        selectedLocs <- locVars1() %>%
+            filter(station_id %in% input$locs1) %>%
+            sf::st_as_sf(coords = c("station_x_coordinate", "station_y_coordinate"), crs = 4326)
+        
+        otherLocs <- locVars1() %>%
+            filter(!station_id %in% input$locs1) %>%
+            sf::st_as_sf(coords = c("station_x_coordinate", "station_y_coordinate"), crs = 4326)
+        
+        leaflet() %>%
             addTiles() %>%
-            addCircleMarkers(lng = ~station_x_coordinate, 
-                             lat = ~station_y_coordinate, 
+            addCircleMarkers(data = otherLocs, 
+                             # lng = ~station_x_coordinate,
+                             # lat = ~station_y_coordinate,
                              label = ~station_id,
-                             radius = 4, stroke = F, fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = T)
+                             radius = 4, stroke = F, fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = T, opacity = 0.5)
                              ) %>%
             addCircleMarkers(data = selectedLocs,
-                             lng = ~station_x_coordinate, 
-                             lat = ~station_y_coordinate, 
+                             # lng = ~station_x_coordinate,
+                             # lat = ~station_y_coordinate,
                              label = ~station_id,
-                             radius = 10, stroke = F, fillColor = "red", fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = T)
+                             radius = 10, stroke = F, fillColor = "red", fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = F)
                              )
     })    
     
