@@ -73,7 +73,12 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   
   map(ivars.list, ~ ncdf4::ncvar_get(nc, .x$variable, start = c(.x$layer, .x$location, .x$time1), count = c(1, 1, -1))) %>%
   bind_rows() %>% bind_cols(times) %>%
-    mutate(datetime = as.POSIXct(timestep, origin = '1995-12-25',tz='UTC')) %>% select(-timestep) %>%
+    mutate(
+      datetime = as.POSIXct(timestep, 
+                            origin = sub("seconds since ", "", nc$dim$time$units)
+      )
+    ) %>% 
+    select(-timestep) %>%
     gather(key = varloc, value = value, -datetime) %>% 
     separate(varloc, c("variable", "location"), sep = "__")
 
@@ -162,11 +167,11 @@ Ecoplot_bloom <- function(con,
 # layer = 1
 # start = 1
 # end = NULL
-# 
-# ncvar_get(nc, "NO3", start = c(1,1,1), count = c(1,1,-1)) %>% dim()
-# ncvar_get(nc, "time")
-# lapply(vars, function(x) ncvar_get(nc, x, start = c(1,1,1), count = c(1,1,-1)))
 # # 
+# # ncvar_get(nc, "NO3", start = c(1,1,1), count = c(1,1,-1)) %>% dim()
+# # ncvar_get(nc, "time")
+# # lapply(vars, function(x) ncvar_get(nc, x, start = c(1,1,1), count = c(1,1,-1)))
+# # # 
 # dff <- nc_his2df(nc, vars, station_id, layer)
-# 
-# class(station_id)
+#  # 
+# # class(station_id)

@@ -112,8 +112,9 @@ sidebar <- dashboardSidebar(
                 menuItem(text = "Start", tabName = "start", icon = icon("home")),
                 menuItem(text = "Station map", tabName = "stationMap", icon = icon("map")),
                 menuItem(text = "Time series", tabName = "timeSeries", icon = icon("list-alt", lib = "glyphicon")),                # menuItem(text = "Z-waardes bekijken", tabName = "z_waardes", icon = icon("cogs")),
-                menuItem(text = "Target diagrams", tabName = "targetDiagrams", icon = icon("upload")),
-                menuItem(text = "Ecoplots", tabName = "ecoPlots", icon = icon("upload")),
+                menuItem(text = "Target diagrams", tabName = "targetDiagrams", icon = icon("glyphicon")),
+                menuItem(text = "Ecoplots", tabName = "ecoPlots", icon = icon("glyphicon")),
+                menuItem(text = "Metadata", tabName = "metadata", icon = icon("glyphicon")),
                 uiOutput("substanceUI"), 
                 uiOutput("locationUI"),
                 uiOutput("layerUI")
@@ -202,6 +203,21 @@ body    <- dashboardBody(
                     box(title = "Future ecoplots",
                         solidHeader = T,
                         status = "success",
+                        collapsible = T,
+                        collapsed = F,
+                        width = 12
+                    ),
+                    
+                )),
+        
+        ##== Metadata ==============
+        
+        tabItem(tabName = "metadata", 
+                fluidRow(
+                    box(title = "metadata",
+                        solidHeader = T,
+                        status = "success",
+                        verbatimTextOutput("metadata1"),
                         collapsible = T,
                         collapsed = F,
                         width = 12
@@ -303,7 +319,10 @@ server <- function(input, output, session) {
             sf::st_as_sf(coords = c("station_x_coordinate", "station_y_coordinate"), crs = 4326)
         
         leaflet() %>%
-            addTiles() %>%
+            addTiles(group = "OSM") %>%
+            addProviderTiles(providers$Esri.WorldTopoMap, group = "Esri.WorldTopoMap") %>%
+            addProviderTiles(providers$Esri.WorldImagery, group = "Esri.WorldImagery") %>%
+            leaflet::addProviderTiles("OpenSeaMap", group = "OpenSeaMap") %>%
             addCircleMarkers(data = otherLocs, 
                              # lng = ~station_x_coordinate,
                              # lat = ~station_y_coordinate,
@@ -315,8 +334,18 @@ server <- function(input, output, session) {
                              # lat = ~station_y_coordinate,
                              label = ~station_id,
                              radius = 10, stroke = F, fillColor = "red", fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = F)
-                             )
+                             ) %>%
+            leaflet::addLayersControl(
+                baseGroups = c("OSM",  "Esri.WorldTopoMap", "Esri.WorldImagery"),
+                overlayGroups = c("OpenSeaMap")) %>%
+            hideGroup("OpenSeaMap")
+        
     })    
+    
+    output$metadata1 <- renderText({
+        
+        print(nc1())
+    })
     
     ###== Second connection ==================================
     
@@ -324,7 +353,7 @@ server <- function(input, output, session) {
     nc2 <- reactive({ncdf4::nc_open(input$con2)})
     
     # prints model output path
-    output$testContent2 <- renderText({
+    output$testContent2 <- renderPrint({
         input$con2
     })
     
