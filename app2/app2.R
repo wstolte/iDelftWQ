@@ -299,12 +299,12 @@ server <- function(input, output, session) {
     
     
     output$timePlot1 <- renderPlot({
-        dff1 <- nc_his2df(nc1(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "left")
+        dff1 <- nc_his2df(nc1(), input$subs1, input$locs1, as.numeric(input$layer1)) %>% mutate(plot = "left")
         # dff2 <- nc_his2df(nc2(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "right")
         dff <- dff1 #%>% bind_rows(dff2)
         
         ggplot(dff, aes(datetime, value)) + 
-            geom_path(aes(color = plot)) + 
+            geom_path(aes(color = plot, linetype = layer)) + 
             facet_grid(variable ~ location, scales = "free")
     })
     
@@ -414,7 +414,7 @@ server <- function(input, output, session) {
     
     output$layerUI <- renderUI({
         tagList(
-            selectInput("layer1", "layers", layers1())
+            selectInput("layer1", "layers", layers1(), multiple = T)
         )
     })
     
