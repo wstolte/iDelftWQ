@@ -10,6 +10,10 @@ con <- "p:/11204882-002-interreg-wadden-sea/simulations/A07_waq_normal_e3_2006_n
 nc <- ncdf4::nc_open(con)
 names(nc$var)
 
+class(as.list(nc))
+
+listviewer::jsonedit(nc)
+
 nc$var$Si$size
 
 # first dimension: layer

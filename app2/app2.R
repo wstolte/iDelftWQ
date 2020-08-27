@@ -156,16 +156,16 @@ body    <- dashboardBody(
                     )
                 )
         ),
-
+        
         ##========= map page ============================
         tabItem(tabName = "stationMap",
                 fluidRow(
-                        leafletOutput("map1", height = "90vh"),
-                        width = 12#,
+                    leafletOutput("map1", height = "90vh"),
+                    width = 12#,
                 )
         ),
-
-                
+        
+        
         ##========= time series page ============================
         tabItem(tabName = "timeSeries",
                 fluidRow(
@@ -283,7 +283,11 @@ server <- function(input, output, session) {
     
     
     output$timePlot1 <- renderPlot({
-        dff1 <- nc_his2df(nc1(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "left")
+        dff1 <- nc_his2df(nc = nc1(), 
+                          vars = input$subs1, 
+                          station_id = input$locs1, 
+                          layer = input$layer1) %>% 
+            mutate(plot = "left")
         # dff2 <- nc_his2df(nc2(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "right")
         dff <- dff1 #%>% bind_rows(dff2)
         
@@ -309,13 +313,13 @@ server <- function(input, output, session) {
                              # lat = ~station_y_coordinate,
                              label = ~station_id,
                              radius = 4, stroke = F, fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = T, opacity = 0.5)
-                             ) %>%
+            ) %>%
             addCircleMarkers(data = selectedLocs,
                              # lng = ~station_x_coordinate,
                              # lat = ~station_y_coordinate,
                              label = ~station_id,
                              radius = 10, stroke = F, fillColor = "red", fillOpacity = 1, labelOptions = labelOptions(noHide = T, textOnly = F)
-                             )
+            )
     })    
     
     ###== Second connection ==================================
