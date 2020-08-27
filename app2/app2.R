@@ -406,19 +406,19 @@ server <- function(input, output, session) {
     
     output$substanceUI <- renderUI({
         tagList(
-            selectInput("subs1", "substances", subVars1()$variable, selected = "NO3", multiple = T)
+            selectInput("subs1", "substances", subVars1()$variable, selected = subVars1()$variable[1], multiple = T)
         )
     })
     
     output$locationUI <- renderUI({
         tagList(
-            selectInput("locs1", "locations", locVars1()$station_id, selected = "NOORDWK20", multiple = T)
+            selectInput("locs1", "locations", locVars1()$station_id, selected = locVars1()$station_id[1], multiple = T)
         )
     })
     
     output$layerUI <- renderUI({
         tagList(
-            selectInput("layer1", "layers", layers1(), multiple = T)
+            selectInput("layer1", "layers", layers1(), selected = max(layers1()), multiple = T)
         )
     })
     
