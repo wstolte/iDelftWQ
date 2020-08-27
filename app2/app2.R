@@ -302,7 +302,7 @@ server <- function(input, output, session) {
         dff1 <- nc_his2df(nc = nc1(), 
                           vars = input$subs1, 
                           station_id = input$locs1, 
-                          layer = input$layer1) %>% 
+                          layer = as.numeric(input$layer1)) %>% 
             mutate(plot = "left")
         # dff2 <- nc_his2df(nc2(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "right")
         dff <- dff1 #%>% bind_rows(dff2)
