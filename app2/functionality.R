@@ -62,7 +62,7 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   ivars <- expand.grid(vars, layer, ilocation, time1)
   names(ivars) <- c("variable", "layer", "location", "time1")
   ivars$variable <- as.character(ivars$variable)
-  names <- expand.grid(vars, station_id) %>% mutate(name = paste(Var1, Var2, sep = "__")) %>% select(name) %>% unlist()
+  names <- expand.grid(vars, layer, station_id) %>% mutate(name = paste(Var1, Var2, Var3, sep = "__")) %>% select(name) %>% unlist()
   ivars.list <- split(ivars, seq(nrow(ivars)))
   names(ivars.list) = names
   
@@ -73,9 +73,14 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   
   map(ivars.list, ~ ncdf4::ncvar_get(nc, .x$variable, start = c(.x$layer, .x$location, .x$time1), count = c(1, 1, -1))) %>%
   bind_rows() %>% bind_cols(times) %>%
-    mutate(datetime = as.POSIXct(timestep, origin = '1995-12-25',tz='UTC')) %>% select(-timestep) %>%
+    mutate(
+      datetime = as.POSIXct(timestep, 
+                            origin = sub("seconds since ", "", nc$dim$time$units)
+      )
+    ) %>% 
+    select(-timestep) %>%
     gather(key = varloc, value = value, -datetime) %>% 
-    separate(varloc, c("variable", "location"), sep = "__")
+    separate(varloc, c("variable", "layer", "location"), sep = "__")
 
   # make list with
   # location metadata
@@ -155,19 +160,3 @@ Ecoplot_bloom <- function(con,
   z
 }
 
-#test
-# con <- "p:/11204882-002-interreg-wadden-sea/simulations/A07_waq_normal_e3_2006_new_obs/DFM_OUTPUT_DCSM-FM_0_5nm_waq/DCSM-FM_0_5nm_waq_0000_his.nc"
-# nc <- ncdf4::nc_open(con)
-# vars = c("NO3", "NH4")
-# station_id = c("NOORDWK20", "NOORDWK70")
-# layer = 1
-# start = 1
-# end = NULL
-# 
-# ncvar_get(nc, "NO3", start = c(1,1,1), count = c(1,1,-1)) %>% dim()
-# ncvar_get(nc, "time")
-# lapply(vars, function(x) ncvar_get(nc, x, start = c(1,1,1), count = c(1,1,-1)))
-# # 
-# dff <- nc_his2df(nc, vars, station_id, layer)
-# 
-# class(station_id)

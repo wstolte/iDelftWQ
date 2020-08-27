@@ -7,12 +7,12 @@ source("app2/functionality.r")
 
 ncdf4::nc_close(nc = nc)
 con <- "p:/11204882-002-interreg-wadden-sea/simulations/A07_waq_normal_e3_2006_new_obs/DFM_OUTPUT_DCSM-FM_0_5nm_waq/DCSM-FM_0_5nm_waq_0000_his.nc"
+con <- "c:\\Users\\stolte\\Documents\\testdata\\MB_02_waq_0000_his.nc"
 nc <- ncdf4::nc_open(con)
 names(nc$var)
 
-class(as.list(nc))
-
-listviewer::jsonedit(nc)
+timeUnits <- nc$dim$time$units
+timeOffset <- sub("seconds since ", "", nc$dim$time$units)
 
 nc$var$Si$size
 
