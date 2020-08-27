@@ -27,6 +27,17 @@ allVars <- function(nc){
   map(nc$var, list("size"))
 }
 
+getVarNames <- function(nc){
+  bind_cols(
+    varIDname = names(map(nc$var, list("id", 1))),
+    varName = map_chr(nc$var, list("longname")),
+    varUnit = map_chr(nc$var, list("units")),
+    varDims = unname(map_int(map(nc$var, list("size")), length))
+  )
+}
+
+
+# View(getVarNames(nc))
 
 varDims <- function(allvars){
   map(allvars, function(x) length(x)) %>%
@@ -59,6 +70,7 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   # extract data for variables according to indices
   # make start indices in right dimension,
   # and number of data steps to retrieve in each dimension (-1 for all data in dimension)
+  
   ivars <- expand.grid(vars, layer, ilocation, time1)
   names(ivars) <- c("variable", "layer", "location", "time1")
   ivars$variable <- as.character(ivars$variable)
@@ -71,7 +83,9 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   
   times <- tibble(timestep = ncvar_get(nc, "time"))
   
-  map(ivars.list, ~ ncdf4::ncvar_get(nc, .x$variable, start = c(.x$layer, .x$location, .x$time1), count = c(1, 1, -1))) %>%
+  prettyVarNames <- getVarNames(nc) %>% select(varIDname, varName) %>% filter(varIDname %in% vars)
+  
+  df <- map(ivars.list, ~ ncdf4::ncvar_get(nc, .x$variable, start = c(.x$layer, .x$location, .x$time1), count = c(1, 1, -1))) %>%
   bind_rows() %>% bind_cols(times) %>%
     mutate(
       datetime = as.POSIXct(timestep, 
@@ -80,7 +94,8 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
     ) %>% 
     select(-timestep) %>%
     gather(key = varloc, value = value, -datetime) %>% 
-    separate(varloc, c("variable", "layer", "location"), sep = "__")
+    separate(varloc, c("variable", "layer", "location"), sep = "__") %>%
+    left_join(prettyVarNames, by = c(variable = "varIDname"))
 
   # make list with
   # location metadata

@@ -53,7 +53,7 @@ getPackage("lubridate")
 getPackage("shinycssloaders")
 getPackage("V8")
 # library(htmlwidgets)
-# getPackage("mapview")
+getPackage("tidyverse")
 # library(plotly)
 # library(shinyjs)
 
@@ -267,25 +267,26 @@ server <- function(input, output, session) {
     
     # Makes list with all variables in model output file and their dimensions
     allVars1 <- reactive({
-        map(nc1()$var, list("size"))
+        getVarNames(nc1())
+        # map(nc1()$var, list("size"))
     })
     
     # Makes dataframe with all variables and their dimension number
     # 1 = either timestep or location var
     # 2 = surface specific in something/m2
     # 3 = volume specific such as substances in g/m3
-    varDims1 <- reactive({
-        map(allVars1(), function(x) length(x)) %>%
-            unlist(use.names = T) %>%
-            as.data.frame() %>%
-            rownames_to_column() %>%
-            rename(variable = rowname, dims = ".")
-    })
+    # varDims1 <- reactive({
+    #     map(allVars1(), function(x) length(x)) %>%
+    #         unlist(use.names = T) %>%
+    #         as.data.frame() %>%
+    #         rownames_to_column() %>%
+    #         rename(variable = rowname, dims = ".")
+    # })
     
     subVars1 <- reactive({
-        varDims1() %>% 
-            filter(dims == 3) %>%
-            filter(!grepl("water_quality_output", variable))
+        allVars1() %>% 
+            filter(varDims == 3) #%>%
+            # filter(!grepl("water_quality_output", variable))
     })
     
     # Makes dataframe with all locations coordinates, names and id
@@ -300,7 +301,8 @@ server <- function(input, output, session) {
     
     output$timePlot1 <- renderPlot({
         dff1 <- nc_his2df(nc = nc1(), 
-                          vars = input$subs1, 
+                          vars = subVars1()[subVars1()$varName %in% input$subs1,]$varIDname,
+                          # vars = input$subs1, 
                           station_id = input$locs1, 
                           layer = as.numeric(input$layer1)) %>% 
             mutate(plot = "left")
@@ -309,7 +311,7 @@ server <- function(input, output, session) {
         
         ggplot(dff, aes(datetime, value)) + 
             geom_path(aes(color = plot, linetype = layer)) + 
-            facet_grid(variable ~ location, scales = "free")
+            facet_grid(varName ~ location, scales = "free")
     })
     
     output$map1 <- renderLeaflet({
@@ -406,7 +408,7 @@ server <- function(input, output, session) {
     
     output$substanceUI <- renderUI({
         tagList(
-            selectInput("subs1", "substances", subVars1()$variable, selected = subVars1()$variable[1], multiple = T)
+            selectInput("subs1", "substances", subVars1()$varName, selected = subVars1()$varName[1], multiple = T)
         )
     })
     

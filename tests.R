@@ -17,8 +17,13 @@ layer = 1
 start = 1
 end = NULL
 #
+
+vars <- getVarNames(nc)
+vars[vars$varName == "NO3",]
+
+
 time = ncvar_get(nc, "time")
-ncvar_get(nc, "NO3", start = c(1,165,1), count = c(1,1,-1)) %>% dim()
+ncvar_get(nc, "Chlfa", start = c(1,165,1), count = c(1,1,-1)) %>% dim()
 t_1 <- ncvar_get(nc, "temperature", start = c(1,217,1), count = c(1,1,-1))
 t_20 <- ncvar_get(nc, "temperature", start = c(20,217,1), count = c(1,1,-1))
 df <- bind_cols(time = time, t1 = t_1, t20 = t_20)
