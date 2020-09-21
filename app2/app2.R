@@ -1,7 +1,7 @@
 
 
 ###########################################################
-# AqMaD RShiny interface                                  #
+# iDelftWQ hisView  RShiny interface                      #
 #                                                         #
 # Auteurs: Willem Stolte                                  #
 #                                                         #
@@ -112,12 +112,20 @@ sidebar <- dashboardSidebar(
                 menuItem(text = "Start", tabName = "start", icon = icon("home")),
                 menuItem(text = "Station map", tabName = "stationMap", icon = icon("map")),
                 menuItem(text = "Time series", tabName = "timeSeries", icon = icon("list-alt", lib = "glyphicon")),                # menuItem(text = "Z-waardes bekijken", tabName = "z_waardes", icon = icon("cogs")),
-                menuItem(text = "Target diagrams", tabName = "targetDiagrams", icon = icon("glyphicon")),
-                menuItem(text = "Ecoplots", tabName = "ecoPlots", icon = icon("glyphicon")),
-                menuItem(text = "Metadata", tabName = "metadata", icon = icon("glyphicon")),
+                # menuItem(text = "vertical profiles", tabName = "verticalProfiles", icon = icon("list-alt", "glyphicon")),
+                menuItem(text = "Target diagrams", tabName = "targetDiagrams", icon = icon("list-alt", "glyphicon")),
+                # menuItem(text = "Ecoplots", tabName = "ecoPlots", icon = icon("list-alt", "glyphicon")),
+                # menuItem(text = "Metadata", tabName = "metadata", icon = icon("list-alt", "glyphicon")),
                 uiOutput("substanceUI"), 
                 uiOutput("locationUI"),
-                uiOutput("layerUI")
+                uiOutput("layerUI"),
+                checkboxInput("allSteps", "All time steps", TRUE),
+                conditionalPanel(
+                    condition = "input.allSteps == false",
+                    sliderInput(
+                        "timeSteps", "time steps", min = 1, max = 10000, value = c(1,100000)
+                    )
+                )
                 # menuItem(text = "Achtergrondinformatie", tabName = "info", icon = icon("info"))
     ))
 ## rows have a grid width of 12, so a box with width = 4, takes up one third of the space
@@ -179,6 +187,21 @@ body    <- dashboardBody(
                         # background = "green",
                         status = "success")
                 )),
+        
+        ##== Vertical Profiles ==============
+        
+        tabItem(tabName = "verticalProfiles", 
+                fluidRow(
+                    box(title = "Future vertical profile plots",
+                        solidHeader = T,
+                        status = "success",
+                        collapsible = T,
+                        collapsed = F,
+                        width = 12
+                    ),
+                    
+                )),
+        
         
         
         ##== Target Diagrams ==============
@@ -285,8 +308,7 @@ server <- function(input, output, session) {
     
     subVars1 <- reactive({
         allVars1() %>% 
-            filter(varDims == 3) #%>%
-            # filter(!grepl("water_quality_output", variable))
+            filter(varDims == 3)
     })
     
     # Makes dataframe with all locations coordinates, names and id
@@ -308,6 +330,7 @@ server <- function(input, output, session) {
             mutate(plot = "left")
         # dff2 <- nc_his2df(nc2(), input$subs1, input$locs1, input$layer1) %>% mutate(plot = "right")
         dff <- dff1 #%>% bind_rows(dff2)
+        # dff$station_id <- factor(dff$station_id, levels = input$locs1)
         
         ggplot(dff, aes(datetime, value)) + 
             geom_path(aes(color = plot, linetype = layer)) + 
@@ -407,9 +430,9 @@ server <- function(input, output, session) {
     ##==UI OPBOUW=========================================
     
     output$substanceUI <- renderUI({
-        tagList(
-            selectInput("subs1", "substances", subVars1()$varName, selected = subVars1()$varName[1], multiple = T)
-        )
+        # tagList(
+            selectInput("subs1", "substances", unname(subVars1()$varName), selected = unname(subVars1()$varName)[1], multiple = T)
+        # )
     })
     
     output$locationUI <- renderUI({
