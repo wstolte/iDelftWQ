@@ -15,6 +15,7 @@ getPackage("tidyverse")
 # ncdf4::nc_close(nc = nc1)
 
 
+
 colbind_loc_vars <- function(nc, vars = c("station_x_coordinate", "station_y_coordinate", "station_name", "station_id")){
   names(vars) = vars
   l <- lapply(vars, function(x) {ncdf4::ncvar_get(nc, x)}) 
@@ -47,10 +48,28 @@ varDims <- function(allvars){
     rename(variable = rowname, dims = ".")
 }
 
+
+# pulling data from the North Sea Wadden Sea database
+getNWDMdata <- function(vars, station_id, layer, start = NULL, end = NULL){
+  
+  # make location latlon
+  
+  # transform varnames
+  
+  # convert layer to depth
+  
+  # set time range
+  
+  url <- ""
+  
+}
+
+
+
 # subsetting nc_his file for locations, layers, variables and time steps
 nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   
-  
+  station_id <- sort(station_id)
   # locations
   # check availability and raise an error if not
   # find index for locs
@@ -82,7 +101,7 @@ nc_his2df = function(nc, vars, station_id, layer, start = NULL, end = NULL){
   # map(ivars.list, ~ c(.x$layer, .x$location))
   
   times <- tibble(timestep = ncvar_get(nc, "time"))
-  
+   
   prettyVarNames <- getVarNames(nc) %>% select(varIDname, varName) %>% filter(varIDname %in% vars)
   
   df <- map(ivars.list, ~ ncdf4::ncvar_get(nc, .x$variable, start = c(.x$layer, .x$location, .x$time1), count = c(1, 1, -1))) %>%
