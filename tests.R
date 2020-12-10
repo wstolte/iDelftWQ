@@ -9,7 +9,10 @@ ncdf4::nc_close(nc = nc)
 
 #test with north sea model output
 con <- "p:/11204882-002-interreg-wadden-sea/simulations/A07_waq_normal_e3_2006_new_obs/DFM_OUTPUT_DCSM-FM_0_5nm_waq/DCSM-FM_0_5nm_waq_0000_his.nc"
+con <- "p:/11205259-006-d-hydro-grevelingen/model/WAQ/2008-GetijGrevelingen/computations/BBWTUK12_SLR_5_002_bnd_new_somA/DFM_OUTPUT_Grevelingen-FM/Grevelingen-FM_0000_his.nc"
 nc <- ncdf4::nc_open(con)
+getVarNames(nc) %>% View()
+getVarNames(nc) %>% write_delim("data/delwaqVarNames.csv", delim = ";")
 vars = c("NO3", "NH4")
 vars = "temperature"
 station_id = c("NOORDWK20", "NOORDWK70")
@@ -18,8 +21,8 @@ start = 1
 end = NULL
 #
 
-vars <- getVarNames(nc)
-vars[vars$varName == "NO3",]
+# vars <- getVarNames(nc)
+# vars[vars$varName == "NO3",]
 
 
 time = ncvar_get(nc, "time")
@@ -51,6 +54,27 @@ ggplot() +
 #  #
 # # class(station_id)
 
+times <- ncvar_get(nc, "time")
+datetimes <- as.POSIXct(times, 
+                        origin = sub("seconds since ", "", nc$dim$time$units)
+  )
+head(datetimes, 1)
+tail(datetimes, 1)
+
+prettyVarNames <- getVarNames(nc) %>% select(varIDname, varName) %>% filter(varIDname %in% vars)
+
+df <- map(ivars.list, ~ ncdf4::ncvar_get(nc, .x$variable, start = c(.x$layer, .x$location, .x$time1), count = c(1, 1, -1))) %>%
+  bind_rows() %>% bind_cols(times) %>%
+  mutate(
+    datetime = as.POSIXct(timestep, 
+                          origin = sub("seconds since ", "", nc$dim$time$units)
+    )
+  ) %>% 
+  select(-timestep) %>%
+  gather(key = varloc, value = value, -datetime) %>% 
+  separate(varloc, c("variable", "layer", "location"), sep = "__") %>%
+  left_join(prettyVarNames, by = c(variable = "varIDname"))
+
 
 df <- colbind_loc_vars(nc, locvars)
 
@@ -58,7 +82,7 @@ t <- ncdf4::ncvar_get(nc, "timestep")
 
 ncdf4::ncvar_get(nc, "NH4") %>% dim()
 
-ncdf4::ncvar_get(nc, "temperature", start = c(1, , .x$time1), count = c(1, 1, -1)))
+ncdf4::ncvar_get(nc, "temperature", start = c(1, , .x$time1), count = c(1, 1, -1))
 
 ncdf4::nc_close(nc)
 

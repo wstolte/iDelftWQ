@@ -116,18 +116,27 @@ sidebar <- dashboardSidebar(
                 menuItem(text = "Target diagrams", tabName = "targetDiagrams", icon = icon("list-alt", "glyphicon")),
                 # menuItem(text = "Ecoplots", tabName = "ecoPlots", icon = icon("list-alt", "glyphicon")),
                 # menuItem(text = "Metadata", tabName = "metadata", icon = icon("list-alt", "glyphicon")),
-                uiOutput("substanceUI"), 
+                # sidebarMenuOutput("menu"), (make dynamic conditionals. see https://github.com/rstudio/shinydashboard/issues/86)
                 uiOutput("locationUI"),
+                conditionalPanel(
+                    condition="input.sidebarmenu === 'timeSeries'", uiOutput("substanceUI")
+                    ), 
                 uiOutput("layerUI"),
                 checkboxInput("allSteps", "All time steps", TRUE),
                 conditionalPanel(
                     condition = "input.allSteps == false",
                     sliderInput(
-                        "timeSteps", "time steps", min = 1, max = 10000, value = c(1,100000)
+                        "timeSteps", "time steps", min = 1, max = 100, value = c(1,100)
+                        # "timeSteps", "time steps", min = head(allTimes(), 1), max = tail(allTimes(), 1), value = c(head(allTimes(), 1),tail(allTimes(), 1))
                     )
                 )
                 # menuItem(text = "Achtergrondinformatie", tabName = "info", icon = icon("info"))
     ))
+
+
+
+
+
 ## rows have a grid width of 12, so a box with width = 4, takes up one third of the space
 ## tops will be lined out, bottoms not
 ## heights are in pixels.. 
@@ -292,6 +301,10 @@ server <- function(input, output, session) {
     allVars1 <- reactive({
         getVarNames(nc1())
         # map(nc1()$var, list("size"))
+    })
+    
+    allTimes <- reactive({
+        getTimes(nc1())
     })
     
     # Makes dataframe with all variables and their dimension number
