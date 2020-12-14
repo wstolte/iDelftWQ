@@ -118,9 +118,10 @@ sidebar <- dashboardSidebar(
                 # menuItem(text = "Metadata", tabName = "metadata", icon = icon("list-alt", "glyphicon")),
                 # sidebarMenuOutput("menu"), (make dynamic conditionals. see https://github.com/rstudio/shinydashboard/issues/86)
                 uiOutput("locationUI"),
-                conditionalPanel(
-                    condition="input.sidebarmenu === 'timeSeries'", uiOutput("substanceUI")
-                    ), 
+                uiOutput("substanceUI"),
+                # conditionalPanel(
+                #     condition="input.sidebarmenu === 'timeSeries'", uiOutput("substanceUI")
+                #     ), 
                 uiOutput("layerUI"),
                 checkboxInput("allSteps", "All time steps", TRUE),
                 conditionalPanel(
