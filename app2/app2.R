@@ -162,7 +162,7 @@ body    <- dashboardBody(
                             inputId = "con1", 
                             label = "path to output 1", 
                             width = 1000, 
-                            value = "p:/11204882-002-interreg-wadden-sea/simulations/A07_waq_normal_e3_2006_new_obs/DFM_OUTPUT_DCSM-FM_0_5nm_waq/DCSM-FM_0_5nm_waq_0000_his.nc"
+                            value = "http://watersysteemdata.deltares.nl/thredds/dodsC/watersysteemdata/Noordzee/test/DCSMhis1.nc"
                         )
                     ),
                     box(
